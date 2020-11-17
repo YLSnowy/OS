@@ -172,7 +172,8 @@ trap_dispatch(struct trapframe *tf) {
         c = cons_getc();
         switch(c){
         case '0':
-        	if (tf->tf_cs != KERNEL_CS) {
+	    cprintf("keyboard 0\n");
+            if (tf->tf_cs != KERNEL_CS) {
             tf->tf_cs = KERNEL_CS;
             tf->tf_ds = tf->tf_es = KERNEL_DS;
             tf->tf_eflags &= ~FL_IOPL_MASK;
@@ -184,7 +185,8 @@ trap_dispatch(struct trapframe *tf) {
         	
         	break;
         case '3':
-        	if (tf->tf_cs != USER_CS) {
+	    cprintf("keyboard 3\n");
+            if (tf->tf_cs != USER_CS) {
             switchk2u = *tf;
             switchk2u.tf_cs = USER_CS;
             switchk2u.tf_ds = switchk2u.tf_es = switchk2u.tf_ss = USER_DS;
@@ -226,6 +228,7 @@ trap_dispatch(struct trapframe *tf) {
             //使得iret恢复寄存器的时候，从switchk2u所规定的栈中恢复，将存储tf值的地址改为
             //switchk2u地址的位置。
             *((uint32_t *)tf - 1) = (uint32_t)&switchk2u;
+	    cprintf("success\n");
         }
         break;
     case T_SWITCH_TOK://tf_es为附加段，tf_cs为当前中断的代码段,tf_ds为当前中断的数据段
@@ -237,6 +240,7 @@ trap_dispatch(struct trapframe *tf) {
             //memmove：将(sizeof(struct trapframe) - 8)字节的值从tf所指向的地址复制到switchu2k所指向的地址
             memmove(switchu2k, tf, sizeof(struct trapframe) - 8);
             *((uint32_t *)tf - 1) = (uint32_t)switchu2k;
+	    cprintf("success\n");
         }
         break;
     case IRQ_OFFSET + IRQ_IDE1:
